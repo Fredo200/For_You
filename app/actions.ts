@@ -2,6 +2,11 @@
 "use server";
 
 import { getCoordinates, getWeather } from "@/lib/weather";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+    apiVersion: "2025-02-11.acacia" as any,
+});
 
 // Simple in-memory cache with TTL
 const cache = new Map<string, { data: any; expires: number }>();
@@ -306,5 +311,34 @@ export async function getCitySuggestions(query: string) {
         return suggestions;
     } catch (error) {
         return [];
+    }
+}
+
+export async function createCheckoutSession(amount: number = 500) {
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [
+                {
+                    price_data: {
+                        currency: "usd",
+                        product_data: {
+                            name: "Support Weather App Coffee",
+                            description: "Thank you for the coffee!",
+                        },
+                        unit_amount: amount,
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: "payment",
+            success_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/?success=true`,
+            cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/?canceled=true`,
+        });
+
+        return { url: session.url };
+    } catch (error: any) {
+        console.error("Stripe Checkout Error:", error);
+        throw new Error(error.message || "Failed to create checkout session");
     }
 }

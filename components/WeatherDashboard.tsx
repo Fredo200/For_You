@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 
 // Dynamically import CityMap to avoid SSR issues with Leaflet
 const CityMap = dynamic(() => import("@/components/CityMap"), { ssr: false });
+import CoffeeButton from "@/components/CoffeeButton";
 
 export default function WeatherDashboard() {
     const [city, setCity] = useState("Nairobi");
@@ -380,6 +381,7 @@ export default function WeatherDashboard() {
                         </div>
                     ))}
             </div>
+            <CoffeeButton isDark={isDark} />
         </div>
     );
 }
