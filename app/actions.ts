@@ -178,6 +178,10 @@ export async function getCityVideoId(city: string) {
 }
 
 export async function getCityNews(city: string) {
+    const cacheKey = `news:${city}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
     try {
         const response = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(city + " local news")}&hl=en-US&gl=US&ceid=US:en`);
         const xml = await response.text();
@@ -203,6 +207,7 @@ export async function getCityNews(city: string) {
                 });
             }
         }
+        setCache(cacheKey, items, 60 * 60 * 1000); // 1 hour
         return items;
     } catch (error) {
         return [];

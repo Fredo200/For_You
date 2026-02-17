@@ -1,7 +1,4 @@
-
 "use client";
-
-
 
 import { useState, useEffect } from "react";
 import { getWeatherAction } from "@/app/actions";
@@ -249,57 +246,76 @@ export default function WeatherDashboard() {
                             <div className={`${showNews ? 'lg:col-span-2' : ''}`}>
                                 <div className={cardClass}>
                                     <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-                                        <div>
-                                            <h1 className="text-3xl font-bold sm:text-4xl">{weather.cityName}</h1>
-                                            <p className={`text-lg ${secondaryTextClass}`}>{weather.country}</p>
-                                            <div className="flex items-center gap-3">
-                                                <div className={badgeClass}>
-                                                    {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-                                                </div>
-                                                {time && (
-                                                    <div className={`mt-2 flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold ${isDark ? 'bg-indigo-500/30 text-indigo-200' : 'bg-blue-100 text-blue-700'}`}>
-                                                        🕒 {time}
+                                        <div className="flex-1">
+                                            <div className="flex flex-col gap-1">
+                                                <h1 className="text-4xl font-black sm:text-5xl">{weather.cityName}</h1>
+                                                <p className={`text-xl font-medium ${secondaryTextClass}`}>{weather.country}</p>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={badgeClass}>
+                                                        {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                                     </div>
-                                                )}
-                                            </div>
-                                            {weather.cityName && (
-                                                <div className="mt-4">
-                                                    <button
-                                                        onClick={() => setShowDescription(!showDescription)}
-                                                        className={`text-sm font-semibold underline underline-offset-4 focus:outline-none ${isDark ? 'decoration-white/50 hover:decoration-white' : 'decoration-blue-400/50 hover:decoration-blue-600 text-blue-700'}`}
-                                                    >
-                                                        {showDescription ? "Show less" : `More about ${weather.cityName}`}
-                                                    </button>
-                                                    {showDescription && (
-                                                        <div className="mt-4 space-y-6 animate-in fade-in duration-500">
-                                                            {!weather.description && !weather.images?.length && !weather.videoId && (
-                                                                <div className="flex items-center gap-2 py-4">
-                                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-                                                                    <span className={mutedTextClass}>Finding city details...</span>
-                                                                </div>
-                                                            )}
-
-                                                            {weather.description && (
-                                                                <p className={`max-w-lg text-sm leading-relaxed ${secondaryTextClass}`}>
-                                                                    {weather.description}
-                                                                </p>
-                                                            )}
-                                                            <div className="aspect-video w-full overflow-hidden rounded-xl bg-black/20 shadow-2xl">
-                                                                <iframe
-                                                                    width="100%"
-                                                                    height="100%"
-                                                                    src={`https://www.youtube.com/embed/${weather.videoId || "h_apb3252aA"}?autoplay=0&enablejsapi=1&controls=1&showinfo=0&rel=0&modestbranding=1`}
-                                                                    title="City Video"
-                                                                    frameBorder="0"
-                                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                                    allowFullScreen
-                                                                ></iframe>
-                                                            </div>
+                                                    {time && (
+                                                        <div className={`mt-2 flex items-center gap-1 rounded-full px-3 py-1 text-sm font-semibold ${isDark ? 'bg-indigo-500/30 text-indigo-200' : 'bg-blue-100 text-blue-700'}`}>
+                                                            🕒 {time}
                                                         </div>
                                                     )}
                                                 </div>
+                                            </div>
+
+                                            {/* City Photos - Always Visible */}
+                                            {weather.images && weather.images.length > 0 && (
+                                                <div className="mt-6 grid grid-cols-3 gap-3">
+                                                    {weather.images.map((img: string, i: number) => (
+                                                        <div key={i} className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-black/10 shadow-lg transition-transform hover:scale-105">
+                                                            <img
+                                                                src={img}
+                                                                alt={`${weather.cityName} ${i + 1}`}
+                                                                className="h-full w-full object-cover"
+                                                                loading="lazy"
+                                                            />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             )}
+
+                                            <div className="mt-4">
+                                                <button
+                                                    onClick={() => setShowDescription(!showDescription)}
+                                                    className={`text-sm font-semibold underline underline-offset-4 focus:outline-none ${isDark ? 'decoration-white/50 hover:decoration-white' : 'decoration-blue-400/50 hover:decoration-blue-600 text-blue-700'}`}
+                                                >
+                                                    {showDescription ? "Show less" : `More about ${weather.cityName}`}
+                                                </button>
+                                                {showDescription && (
+                                                    <div className="mt-4 space-y-6 animate-in fade-in duration-500">
+                                                        {!weather.description && !weather.images?.length && !weather.videoId && (
+                                                            <div className="flex items-center gap-2 py-4">
+                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+                                                                <span className={mutedTextClass}>Finding city details...</span>
+                                                            </div>
+                                                        )}
+
+                                                        {weather.description && (
+                                                            <p className={`max-w-lg text-sm leading-relaxed ${secondaryTextClass}`}>
+                                                                {weather.description}
+                                                            </p>
+                                                        )}
+                                                        <div className="aspect-video w-full overflow-hidden rounded-xl bg-black/20 shadow-2xl">
+                                                            <iframe
+                                                                width="100%"
+                                                                height="100%"
+                                                                src={`https://www.youtube.com/embed/${weather.videoId || "h_apb3252aA"}?autoplay=0&enablejsapi=1&controls=1&showinfo=0&rel=0&modestbranding=1`}
+                                                                title="City Video"
+                                                                frameBorder="0"
+                                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                                allowFullScreen
+                                                            ></iframe>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
+
                                         <div className="text-left md:text-right">
                                             <div className="text-4xl font-black sm:text-6xl">
                                                 {Math.round(weather.current.temperature_2m)}°
@@ -368,7 +384,8 @@ export default function WeatherDashboard() {
                                 </div>
                             )}
                         </div>
-                    ))}
+                    )
+                )}
             </div>
             <CoffeeButton isDark={isDark} />
         </div>
