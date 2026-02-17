@@ -200,6 +200,19 @@ export default function WeatherDashboard() {
                     </div>
 
                     <div className="flex gap-2">
+                        {/* Home Button */}
+                        <button
+                            onClick={() => {
+                                setInputValue("");
+                                setCity("Nairobi");
+                                fetchWeather("Nairobi");
+                            }}
+                            className={`rounded-full p-4 transition ${isDark ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-white/60 hover:bg-white/80 text-blue-600 shadow-sm'}`}
+                            title="Go to Home (Nairobi)"
+                        >
+                            🏠
+                        </button>
+
                         {/* Toggle Theme Button */}
                         <button
                             onClick={() => setTheme(isDark ? 'light' : 'dark')}
