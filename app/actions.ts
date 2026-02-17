@@ -108,7 +108,7 @@ export async function getCityImages(city: string) {
 }
 
 export async function getCityVideoId(city: string) {
-    const cacheKey = `video:${city}`;
+    const cacheKey = `video_v3:${city}`;
     const cached = getCached(cacheKey);
     if (cached) return cached;
 
@@ -116,7 +116,7 @@ export async function getCityVideoId(city: string) {
         const fallbacks: { [key: string]: string } = {
             // Europe
             "London": "45ETZ1xvHS0", "Paris": "3u72H83x14Y", "Tokyo": "53_eVd1k3_0",
-            "New York": "MtCMtC50gwY", "Dubai": "IdejM6wCkxA", "Nairobi": "2fKj-XGz2S4",
+            "New York": "MtCMtC50gwY", "Dubai": "IdejM6wCkxA", "Nairobi": "KM1AXdnOCu4",
             "Sydney": "61e3F2m00A", "Rome": "EsFheWkimsU", "Berlin": "hK076Z38fW0",
             "Madrid": "tx_h2aF_rE", "Barcelona": "N3d1d1z5K38", "Amsterdam": "OpqT1q5q3qY",
             "Prague": "5v678_Fp8O0", "Vienna": "X0SScM-qHjA", "Athens": "9P9d5yE4vKk",

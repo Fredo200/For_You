@@ -298,7 +298,7 @@ export default function WeatherDashboard() {
                                                                 <iframe
                                                                     width="100%"
                                                                     height="100%"
-                                                                    src={`https://www.youtube.com/embed/${weather.videoId || "h_apb3252aA"}?autoplay=1&mute=1&controls=1&showinfo=0&rel=0&modestbranding=1`}
+                                                                    src={`https://www.youtube.com/embed/${weather.videoId || "h_apb3252aA"}?autoplay=0&enablejsapi=1&controls=1&showinfo=0&rel=0&modestbranding=1`}
                                                                     title="City Video"
                                                                     frameBorder="0"
                                                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
