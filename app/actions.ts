@@ -3,23 +3,49 @@
 
 import { getCoordinates, getWeather } from "@/lib/weather";
 
+// Simple in-memory cache with TTL
+const cache = new Map<string, { data: any; expires: number }>();
+
+function getCached(key: string) {
+    const cached = cache.get(key);
+    if (cached && cached.expires > Date.now()) {
+        return cached.data;
+    }
+    cache.delete(key);
+    return null;
+}
+
+function setCache(key: string, data: any, ttlMs: number) {
+    cache.set(key, { data, expires: Date.now() + ttlMs });
+}
+
 export async function getCityDescription(city: string) {
+    const cacheKey = `desc:${city}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
     try {
         const response = await fetch(
             `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(city)}`
         );
         if (!response.ok) return null;
         const data = await response.json();
-        return data.extract;
+        const description = data.extract;
+        setCache(cacheKey, description, 60 * 60 * 1000); // 1 hour
+        return description;
     } catch (error) {
         return null;
     }
 }
 
 export async function getCityImages(city: string) {
+    const cacheKey = `images:${city}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
     try {
         const response = await fetch(
-            `https://en.wikipedia.org/w/api.php?action=query&generator=images&titles=${encodeURIComponent(city)}&gimlimit=20&prop=imageinfo&iiprop=url&format=json&origin=*`
+            `https://en.wikipedia.org/w/api.php?action=query&generator=images&titles=${encodeURIComponent(city)}&gimlimit=10&prop=imageinfo&iiprop=url&format=json&origin=*`
         );
 
         if (!response.ok) return [];
@@ -48,6 +74,7 @@ export async function getCityImages(city: string) {
             })
             .slice(0, 3);
 
+        setCache(cacheKey, images, 60 * 60 * 1000); // 1 hour
         return images;
     } catch (error) {
         return [];
@@ -55,6 +82,10 @@ export async function getCityImages(city: string) {
 }
 
 export async function getCityVideoId(city: string) {
+    const cacheKey = `video:${city}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
     try {
         const fallbacks: { [key: string]: string } = {
             "London": "45ETZ1xvHS0",
@@ -62,7 +93,7 @@ export async function getCityVideoId(city: string) {
             "Tokyo": "53_eVd1k3_0",
             "New York": "MtCMtC50gwY",
             "Dubai": "IdejM6wCkxA",
-            "Nairobi": "2b2gJu-g3qE",
+            "Nairobi": "M63U4L5N688", // Updated: Cinematic Nairobi
             "Sydney": "61e3F2m00A",
             "Rome": "EsFheWkimsU",
             "Berlin": "hK076Z38fW0",
@@ -72,42 +103,32 @@ export async function getCityVideoId(city: string) {
             "Toronto": "rXK_fRZS1k",
             "Vancouver": "P1u_Zz5w3w",
             "San Francisco": "h_apb3252aA",
-            "Los Angeles": "yJ-lcdMNdAk",  // LA Travel Guide
-            "Chicago": "s-FbT6VpeIo",      // Chicago 4K
-            "Miami": "kfbJJRdJPPI",        // Miami Travel Guide
-            "Las Vegas": "WJRoLLV2KQg",     // Las Vegas 4K
-            "Hawaii": "6bLMuHWGFQo",       // Hawaii Travel Guide
-            "Hong Kong": "u27baSnhJus",    // Hong Kong 4K
-            "Singapore": "xWx6GFZ6YQE",    // Singapore Travel Guide
-            "Bangkok": "Vn1dHqVLqxs",      // Bangkok 4K
-            "Seoul": "ExN9qPCKTdg",        // Seoul Travel Guide
-            "Mumbai": "ygXxZS3cZqM",       // Mumbai Travel Guide
-            "Delhi": "VuPJGWlTHhY"         // Delhi Travel Guide
+            "Los Angeles": "yJ-lcdMNdAk",
+            "Chicago": "s-FbT6VpeIo",
+            "Miami": "kfbJJRdJPPI",
+            "Las Vegas": "WJRoLLV2KQg",
+            "Hawaii": "6bLMuHWGFQo",
+            "Hong Kong": "u27baSnhJus",
+            "Singapore": "xWx6GFZ6YQE",
+            "Bangkok": "Vn1dHqVLqxs",
+            "Seoul": "ExN9qPCKTdg",
+            "Mumbai": "ygXxZS3cZqM",
+            "Delhi": "VuPJGWlTHhY"
         };
+
         // Use a known good video "Cinematic World" as the ultimate fallback
         const DEFAULT_VIDEO = "h_apb3252aA";
 
-        // 1. Check strict fallbacks
+        // Check strict fallbacks
         for (const [key, value] of Object.entries(fallbacks)) {
-            if (city.toLowerCase().includes(key.toLowerCase())) return value;
-        }
-
-        // 2. Try scraping with "travel guide 4k"
-        try {
-            const response = await fetch(`https://www.youtube.com/results?search_query=${encodeURIComponent(city + " travel guide 4k")}`, {
-                headers: {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                }
-            });
-            const html = await response.text();
-            const videoIdMatch = html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
-            if (videoIdMatch && videoIdMatch[1]) {
-                return videoIdMatch[1];
+            if (city.toLowerCase().includes(key.toLowerCase())) {
+                setCache(cacheKey, value, 24 * 60 * 60 * 1000); // 24 hours
+                return value;
             }
-        } catch (e) {
-            // ignore scraping error
         }
 
+        // Return default video instead of slow scraping
+        setCache(cacheKey, DEFAULT_VIDEO, 24 * 60 * 60 * 1000);
         return DEFAULT_VIDEO;
     } catch (error) {
         return "h_apb3252aA";
@@ -181,7 +202,12 @@ export async function getCityTravelData(city: string) {
     }
 }
 
+
 export async function getWeatherAction(city: string) {
+    const cacheKey = `weather:${city.toLowerCase()}`;
+    const cached = getCached(cacheKey);
+    if (cached) return { success: true, data: cached };
+
     try {
         const coords = await getCoordinates(city);
         const data = await getWeather(coords.latitude, coords.longitude);
@@ -194,23 +220,49 @@ export async function getWeatherAction(city: string) {
             getCityTravelData(coords.name)
         ]);
 
+        const result = {
+            ...data,
+            cityName: coords.name,
+            country: coords.country,
+            description,
+            images,
+            videoId,
+            news,
+            travel
+        };
+
+        setCache(cacheKey, result, 10 * 60 * 1000); // 10 minutes
+
         return {
             success: true,
-            data: {
-                ...data,
-                cityName: coords.name,
-                country: coords.country,
-                description,
-                images,
-                videoId,
-                news,
-                travel
-            },
+            data: result,
         };
     } catch (error: any) {
         return {
             success: false,
             error: error.message || "Failed to fetch weather data",
         };
+    }
+}
+
+export async function getCitySuggestions(query: string) {
+    if (!query || query.length < 2) return [];
+
+    const cacheKey = `suggestions:${query.toLowerCase()}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
+
+    try {
+        const response = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`
+        );
+        if (!response.ok) return [];
+        const data = await response.json();
+        const suggestions = data.results || [];
+
+        setCache(cacheKey, suggestions, 60 * 60 * 1000); // 1 hour
+        return suggestions;
+    } catch (error) {
+        return [];
     }
 }

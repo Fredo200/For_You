@@ -16,6 +16,8 @@ const CityMap = dynamic(() => import("@/components/CityMap"), { ssr: false });
 export default function WeatherDashboard() {
     const [city, setCity] = useState("Nairobi");
     const [inputValue, setInputValue] = useState("");
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [weather, setWeather] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -33,10 +35,34 @@ export default function WeatherDashboard() {
         }
     }, [user, authLoading, router]);
 
+    // Handle suggestions as user types
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (inputValue.length < 2) {
+                setSuggestions([]);
+                setShowSuggestions(false);
+                return;
+            }
+
+            try {
+                const { getCitySuggestions } = await import("@/app/actions");
+                const results = await getCitySuggestions(inputValue);
+                setSuggestions(results);
+                setShowSuggestions(results.length > 0);
+            } catch (err) {
+                console.error("Failed to fetch suggestions:", err);
+            }
+        };
+
+        const timer = setTimeout(fetchSuggestions, 300);
+        return () => clearTimeout(timer);
+    }, [inputValue]);
+
     const fetchWeather = async (cityName: string) => {
         setLoading(true);
         setError("");
         setShowDescription(false);
+        setShowSuggestions(false);
         try {
             const result = await getWeatherAction(cityName);
             if (result.success) {
@@ -80,7 +106,16 @@ export default function WeatherDashboard() {
         if (inputValue.trim()) {
             setCity(inputValue);
             fetchWeather(inputValue);
+            setShowSuggestions(false);
         }
+    };
+
+    const handleSuggestionClick = (suggestion: any) => {
+        const cityName = `${suggestion.name}, ${suggestion.country}`;
+        setInputValue(cityName);
+        setCity(cityName);
+        fetchWeather(cityName);
+        setShowSuggestions(false);
     };
 
     const isDark = theme === 'dark';
@@ -102,6 +137,10 @@ export default function WeatherDashboard() {
         ? "rounded-full bg-white px-8 py-4 font-semibold text-indigo-900 transition hover:bg-opacity-90 disabled:opacity-50"
         : "rounded-full bg-blue-600 px-8 py-4 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50 shadow-lg shadow-blue-600/20";
 
+    const suggestionItemClass = isDark
+        ? "w-full px-6 py-3 text-left hover:bg-white/10 transition-colors border-b border-white/5 last:border-0"
+        : "w-full px-6 py-3 text-left hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-0";
+
     const badgeClass = isDark
         ? "mt-2 inline-block rounded-full bg-white/20 px-4 py-1 text-sm backdrop-blur-sm"
         : "mt-2 inline-block rounded-full bg-blue-600/10 px-4 py-1 text-sm font-medium text-blue-700 backdrop-blur-sm";
@@ -119,22 +158,48 @@ export default function WeatherDashboard() {
 
                 {/* Header Controls */}
                 <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <form onSubmit={handleSearch} className="flex flex-1 gap-4">
-                        <input
-                            type="text"
-                            placeholder="Search city..."
-                            className={inputClass}
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                        />
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={buttonPrimaryClass}
-                        >
-                            {loading ? "..." : "Search"}
-                        </button>
-                    </form>
+                    <div className="relative flex-1">
+                        <form onSubmit={handleSearch} className="flex gap-4">
+                            <input
+                                type="text"
+                                placeholder="Search city..."
+                                className={inputClass}
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                            />
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className={buttonPrimaryClass}
+                            >
+                                {loading ? "..." : "Search"}
+                            </button>
+                        </form>
+
+                        {/* Suggestions Dropdown */}
+                        {showSuggestions && suggestions.length > 0 && (
+                            <div className={`absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl backdrop-blur-lg border shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200 ${isDark ? 'bg-indigo-900/90 border-white/10' : 'bg-white/95 border-slate-200 text-slate-800'}`}>
+                                {suggestions.map((suggestion: any, index: number) => (
+                                    <button
+                                        key={index}
+                                        type="button"
+                                        className={suggestionItemClass}
+                                        onClick={() => handleSuggestionClick(suggestion)}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <span className="font-bold">{suggestion.name}</span>
+                                                <span className={`ml-2 text-sm ${mutedTextClass}`}>{suggestion.admin1 ? `${suggestion.admin1}, ` : ''}{suggestion.country}</span>
+                                            </div>
+                                            <span className="text-xl">📍</span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     <div className="flex gap-2">
                         {/* Toggle Theme Button */}
