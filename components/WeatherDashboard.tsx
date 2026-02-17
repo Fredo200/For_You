@@ -261,7 +261,7 @@ export default function WeatherDashboard() {
                                                     </div>
                                                 )}
                                             </div>
-                                            {weather.description && (
+                                            {weather.cityName && (
                                                 <div className="mt-4">
                                                     <button
                                                         onClick={() => setShowDescription(!showDescription)}
@@ -270,10 +270,19 @@ export default function WeatherDashboard() {
                                                         {showDescription ? "Show less" : `More about ${weather.cityName}`}
                                                     </button>
                                                     {showDescription && (
-                                                        <div className="mt-4 space-y-6">
-                                                            <p className={`max-w-lg text-sm leading-relaxed ${secondaryTextClass}`}>
-                                                                {weather.description}
-                                                            </p>
+                                                        <div className="mt-4 space-y-6 animate-in fade-in duration-500">
+                                                            {!weather.description && !weather.images?.length && !weather.videoId && (
+                                                                <div className="flex items-center gap-2 py-4">
+                                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+                                                                    <span className={mutedTextClass}>Finding city details...</span>
+                                                                </div>
+                                                            )}
+
+                                                            {weather.description && (
+                                                                <p className={`max-w-lg text-sm leading-relaxed ${secondaryTextClass}`}>
+                                                                    {weather.description}
+                                                                </p>
+                                                            )}
 
                                                             {weather.images && weather.images.length > 0 && (
                                                                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -285,11 +294,11 @@ export default function WeatherDashboard() {
                                                                 </div>
                                                             )}
 
-                                                            <div className="aspect-video w-full overflow-hidden rounded-xl bg-black/20">
+                                                            <div className="aspect-video w-full overflow-hidden rounded-xl bg-black/20 shadow-2xl">
                                                                 <iframe
                                                                     width="100%"
                                                                     height="100%"
-                                                                    src={`https://www.youtube.com/embed/${weather.videoId || "h_apb3252aA"}?autoplay=0&controls=1&showinfo=0&rel=0&modestbranding=1`}
+                                                                    src={`https://www.youtube.com/embed/${weather.videoId || "h_apb3252aA"}?autoplay=1&mute=1&controls=1&showinfo=0&rel=0&modestbranding=1`}
                                                                     title="City Video"
                                                                     frameBorder="0"
                                                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
