@@ -284,17 +284,6 @@ export default function WeatherDashboard() {
                                                                     {weather.description}
                                                                 </p>
                                                             )}
-
-                                                            {weather.images && weather.images.length > 0 && (
-                                                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                                                                    {weather.images.map((img: string, i: number) => (
-                                                                        <div key={i} className="relative aspect-square overflow-hidden rounded-lg bg-black/10">
-                                                                            <img src={img} alt={`${weather.cityName} ${i + 1}`} className="h-full w-full object-cover" />
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-
                                                             <div className="aspect-video w-full overflow-hidden rounded-xl bg-black/20 shadow-2xl">
                                                                 <iframe
                                                                     width="100%"
