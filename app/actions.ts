@@ -72,17 +72,17 @@ export async function getCityVideoId(city: string) {
             "Toronto": "rXK_fRZS1k",
             "Vancouver": "P1u_Zz5w3w",
             "San Francisco": "h_apb3252aA",
-            "Los Angeles": "0_55_Z5555",
-            "Chicago": "B_55_Z5555",
-            "Miami": "C_55_Z5555",
-            "Las Vegas": "D_55_Z5555",
-            "Hawaii": "E_55_Z5555",
-            "Hong Kong": "F_55_Z5555",
-            "Singapore": "G_55_Z5555",
-            "Bangkok": "H_55_Z5555",
-            "Seoul": "I_55_Z5555",
-            "Mumbai": "J_55_Z5555",
-            "Delhi": "K_55_Z5555"
+            "Los Angeles": "yJ-lcdMNdAk",  // LA Travel Guide
+            "Chicago": "s-FbT6VpeIo",      // Chicago 4K
+            "Miami": "kfbJJRdJPPI",        // Miami Travel Guide
+            "Las Vegas": "WJRoLLV2KQg",     // Las Vegas 4K
+            "Hawaii": "6bLMuHWGFQo",       // Hawaii Travel Guide
+            "Hong Kong": "u27baSnhJus",    // Hong Kong 4K
+            "Singapore": "xWx6GFZ6YQE",    // Singapore Travel Guide
+            "Bangkok": "Vn1dHqVLqxs",      // Bangkok 4K
+            "Seoul": "ExN9qPCKTdg",        // Seoul Travel Guide
+            "Mumbai": "ygXxZS3cZqM",       // Mumbai Travel Guide
+            "Delhi": "VuPJGWlTHhY"         // Delhi Travel Guide
         };
         // Use a known good video "Cinematic World" as the ultimate fallback
         const DEFAULT_VIDEO = "h_apb3252aA";

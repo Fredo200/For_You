@@ -8,6 +8,10 @@ import { getWeatherAction } from "@/app/actions";
 import { weatherCodeToDescription } from "@/lib/weather";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+// Dynamically import CityMap to avoid SSR issues with Leaflet
+const CityMap = dynamic(() => import("@/components/CityMap"), { ssr: false });
 
 export default function WeatherDashboard() {
     const [city, setCity] = useState("Nairobi");
@@ -246,6 +250,19 @@ export default function WeatherDashboard() {
                                         <WeatherStat label="Wind" value={`${weather.current.wind_speed_10m} km/h`} isDark={isDark} />
                                         <WeatherStat label="Feels Like" value={`${Math.round(weather.current.apparent_temperature)}°`} isDark={isDark} />
                                         <WeatherStat label="Precipitation" value={`${weather.current.precipitation} mm`} isDark={isDark} />
+                                    </div>
+
+                                    {/* City Map */}
+                                    <div className="mt-6">
+                                        <h3 className="mb-3 text-lg font-bold flex items-center gap-2">
+                                            <span>📍</span> Location
+                                        </h3>
+                                        <CityMap
+                                            latitude={weather.latitude}
+                                            longitude={weather.longitude}
+                                            cityName={weather.cityName}
+                                            isDark={isDark}
+                                        />
                                     </div>
                                 </div>
                             </div>
