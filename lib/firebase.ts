@@ -5,12 +5,12 @@ import { getAuth } from "firebase/auth";
 // TODO: Replace the placeholder values below with your actual Firebase config
 // Get these from: Firebase Console > Project Settings > General > Your apps > Web app
 const firebaseConfig = {
-    apiKey: "AIzaSyCr1TxSRKLqjbKzxqvoKbpdM1UM_XyPC9E",
-    authDomain: "for-you-7e8a2.firebaseapp.com",
-    projectId: "for-you-7e8a2",
-    storageBucket: "for-you-7e8a2.firebasestorage.app",
-    messagingSenderId: "346279821187",
-    appId: "1:346279821187:web:YOUR_APP_ID_HERE"
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
 // Initialize Firebase (singleton pattern)
